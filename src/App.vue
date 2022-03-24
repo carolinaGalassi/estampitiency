@@ -8,11 +8,16 @@
 					<p>{{ product.title }}</p>
 					<p>{{ product.description }}</p>
 				</div>
-				<button>Agregar</button>
+				<div v-if="isInCarrito(product)">
+					<button @click="updateCarrito(product, 1)">+</button>
+					<p>{{ amountInCarrito(product) }}</p>
+					<button @click="updateCarrito(product, -1)">-</button>
+				</div>
+				<button v-else @click="addNewProduct(product)">Agregar</button>
 			</article>
 		</section>
 		<aside>
-			<button>3 productos (total: $12)</button>
+			<button>{{ carritoMessage }}</button>
 		</aside>
 		<footer>
 			Encontrá la consigna de este ejercicio y otros más{" "}
@@ -25,22 +30,63 @@
 </template>
 
 <script>
-import { onMounted, reactive } from "vue";
+/* eslint-disable no-mixed-spaces-and-tabs */
+import { onMounted, reactive, computed } from "vue";
 import api from "./api/api";
 
 export default {
 	setup() {
-		const products = reactive([]);
+		const products = reactive({ value: [] });
+		const carrito = reactive({ value: [] });
+
+		const addNewProduct = (product) => {
+			carrito.value = [...carrito.value, { ...product, quantity: 1 }];
+		};
+
+		const positionInCarrito = (product) =>
+			carrito.value.findIndex(
+				(productOfCarrito) => productOfCarrito.id === product.id,
+			);
+
+		const isInCarrito = (product) => positionInCarrito(product) > -1;
+
+		const quantityOf = () => 2; //(index) => carrito.value[index].quantity;
+
+		const updateCarrito = (product, value) => {
+			const indexInCarrito = positionInCarrito(product);
+			carrito.value.splice(indexInCarrito, 1, {
+				...product,
+				quantity: quantityOf() + value,
+			});
+		};
+
+		const carritoMessage = computed(() => {
+			const carritoData = carrito.value.reduce(
+				(previousValue, currentValue) => {
+					return {
+						quantity: previousValue.quantity + currentValue.quantity,
+						amount:
+							previousValue.amount + currentValue.quantity * currentValue.price,
+					};
+				},
+				{ quantity: 0, amount: 0 },
+			);
+			return `${carritoData.quantity} productos ($${carritoData.amount})`;
+		});
+
+		const amountInCarrito = (product) => quantityOf(positionInCarrito(product));
 
 		onMounted(() => {
-			api.list().then((data) => {
-				console.log(data);
-				products.value = data;
-			});
+			api.list().then((data) => (products.value = data));
 		});
 
 		return {
 			products,
+			addNewProduct,
+			carritoMessage,
+			isInCarrito,
+			updateCarrito,
+			amountInCarrito,
 		};
 	},
 };
