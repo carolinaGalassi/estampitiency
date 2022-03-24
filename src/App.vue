@@ -1,26 +1,167 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+	<main>
+		<header>Estampitiency</header>
+		<section>
+			<article v-for="product of products.value" :key="product.id">
+				<img :src="product.image" :alt="product.description" />
+				<div>
+					<p>{{ product.title }}</p>
+					<p>{{ product.description }}</p>
+				</div>
+				<button>Agregar</button>
+			</article>
+		</section>
+		<aside>
+			<button>3 productos (total: $12)</button>
+		</aside>
+		<footer>
+			Encontrá la consigna de este ejercicio y otros más{" "}
+			<a
+				href="https://github.com/goncy/interview-challenges/tree/main/simple-cart"
+				>acá</a
+			>
+		</footer>
+	</main>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import { onMounted, reactive } from "vue";
+import api from "./api/api";
 
 export default {
-  name: 'App',
-  components: {
-    HelloWorld
-  }
-}
+	setup() {
+		const products = reactive([]);
+
+		onMounted(() => {
+			api.list().then((data) => {
+				console.log(data);
+				products.value = data;
+			});
+		});
+
+		return {
+			products,
+		};
+	},
+};
 </script>
 
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+html,
+body {
+	margin: 0;
+	height: 100%;
+	background-color: whitesmoke;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+		"Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+		sans-serif;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+code {
+	font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+		monospace;
+}
+
+#root {
+	max-width: 1250px;
+	min-height: 100vh;
+	margin: auto;
+	background-color: white;
+	box-shadow: 0 0 3px rgba(0, 0, 0, 0.1);
+}
+
+* {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+
+a {
+	color: black;
+}
+
+img {
+	width: 100%;
+	object-fit: contain;
+}
+
+button {
+	color: white;
+	background-color: dodgerblue;
+	border: none;
+	line-height: 48px;
+	border-radius: 4px;
+	font-size: 18px;
+	font-weight: 500;
+	cursor: pointer;
+	padding: 0 16px;
+}
+
+/* Blocks */
+main {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+header {
+	padding: 16px;
+	border-bottom: 1px solid gainsboro;
+	font-weight: bold;
+	font-size: 24px;
+}
+
+footer {
+	padding: 16px;
+	border-top: 1px solid gainsboro;
+	text-align: center;
+	color: gray;
+}
+
+section {
+	padding: 16px;
+	flex: 1;
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+	gap: 12px;
+}
+
+article {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+
+article > div {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	height: 100%;
+}
+
+article > div > p:nth-of-type(1) {
+	font-weight: 500;
+	font-size: 20px;
+}
+
+article > div > p:nth-of-type(2) {
+	color: gray;
+}
+
+article > div > button {
+	margin-top: auto;
+}
+
+aside {
+	position: sticky;
+	bottom: 0;
+	margin: auto;
+	padding-bottom: 16px;
+}
+
+aside > button {
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 </style>
